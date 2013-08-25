@@ -1,6 +1,11 @@
 /** A grammar for Oracle's PL/SQL.
 
 HISTORY:
+    24-AUG-2013 cocoatomo <cocoatomo77@gmail.com>
+        Started adding DDL
+        ref. Oracle(R) Database SQL言語リファレンス 11gリリース2(11.2)
+             http://docs.oracle.com/cd/E16338_01/server.112/b56299/toc.htm
+
     30-JUL-2006 John Kristian <jkristian@netflix.com>
         Upgraded to PL/SQL for Oracle 9.2.
         Added code to gather table and procedure names.
@@ -25,7 +30,7 @@ import java.io.FileInputStream;
 import java.util.HashSet;
 import java.util.Set;
 
-class PlSql {
+public class PlSql {
 
     /** Parse PL/SQL from files.  Each arg is expected to be the name of a file,
         or "-" to indicate System.in.
@@ -38,12 +43,13 @@ class PlSql {
             final String input = args[a];
             final PlSql parser = new PlSql("-".equals(input) ? System.in : new FileInputStream(input));
             try {
-                parser.CompilationUnit();
+                SimpleNode root = parser.CompilationUnit();
+                System.out.println(parser.tables.size() + " tables in " + input);
+                root.dump("");
             } catch(Throwable t) {
             	System.err.println(input + ":1: not parsed");
             	t.printStackTrace();
             }
-            System.out.println(parser.tables.size() + " tables in " + input);
         }
     }
 
@@ -155,6 +161,7 @@ TOKEN: /* SQL and PLSQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_CONSTANT:"CONSTANT">
 |   <K_CONSTRAINT:"CONSTRAINT">
 |   <K_CONSTRAINTS:"CONSTRAINTS">
+|   <K_CREATE:"CREATE">
 |   <K_CURRENT:"CURRENT">
 |   <K_CURSOR:"CURSOR">
 |   <K_DATE:"DATE">
@@ -298,14 +305,15 @@ TOKEN:
 }
 
 /* Represents a PLSQL code block. */
-void CompilationUnit():
+SimpleNode CompilationUnit():
 {}
 {
-    ProcedureDeclaration()
-  | FunctionDeclaration()
-  | SequenceOfStatements()
-  | AlterSession()
-  | "CALL" ProcedureCall()
+    ProcedureDeclaration() { return jjtThis; }
+  | FunctionDeclaration() { return jjtThis; }
+  | SequenceOfStatements() { return jjtThis; }
+  | AlterSession() { return jjtThis; }
+  | "CALL" ProcedureCall() { return jjtThis; }
+  | DDLStatement() { return jjtThis; }
 }
 
 void BindVariable():
@@ -1009,9 +1017,9 @@ void TableName():
 }
 {
     // schema.table@link
-    s=OracleObjectName()       {name.append(s);}
-    [ "." s=OracleObjectName() {name.append(".").append(s);} ]
-    [ "@" s=TNSName()          {name.append("@").append(s);} ]
+    s=OracleObjectName()       {name.append(s);} // table
+    [ "." s=OracleObjectName() {name.append(".").append(s);} ] // schema.table
+    [ "@" s=TNSName()          {name.append("@").append(s);} ] // schema.table@link
     {tables.add(name.toString().toUpperCase());}
 }
 
@@ -1498,4 +1506,124 @@ void ID(String id):
                 + "\nWas expecting: " + id);
         }
     }
+}
+
+/* DDL */
+void DDLStatement():
+{}
+{
+    CreateTableStatement()
+}
+
+void CreateTableStatement():
+{}
+{
+    <K_CREATE> [ "GLOBAL" "TEMPORARY" ] <K_TABLE> TableNameWithoutLink()
+    ( RelationalTable() | ObjectTable() | XMLTypeTable() )
+}
+
+void TableNameWithoutLink():
+{
+    String s;
+    StringBuilder name = new StringBuilder();
+}
+{
+    // schema.table@link
+    s=OracleObjectName()       {name.append(s);} // table
+    [ "." s=OracleObjectName() {name.append(".").append(s);} ] // schema.table
+    {tables.add(name.toString().toUpperCase());}
+}
+
+void RelationalTable():
+{}
+{
+    [ "(" RelationalProperties() ")" ]
+    [ "ON" "COMMIT" ( "DELETE" | "PRESERVE" ) "ROWS" ]
+    [ PhysicalProperties() ]
+    [ TableProperties() ] ";"
+}
+
+void RelationalProperties():
+{}
+{
+    RelationalProperty()
+    ( "," RelationalProperty() )*
+}
+
+void RelationalProperty():
+{}
+{
+    ColumnDefinition()
+  | VirtualColumnDefinition()
+  | ( OutOfLineConstraint() | OutOfLineRefConstraint() | SupplementalLoggingProps() )
+}
+
+void ColumnDefinition():
+{}
+{
+    TableColumn() BasicDataTypeDefinition()
+    [ "SORT" ]
+    [ "DEFAULT" ]
+    [ "ENCRYPT" ]
+    [ (InlineConstraint())+ | InlineRefConstraint() ]
+}
+
+void InlineConstraint():
+{}
+{
+    "PlaceHolder_IC"
+}
+
+void InlineRefConstraint():
+{}
+{
+    "PlaceHolder_IRC"
+}
+
+void VirtualColumnDefinition():
+{}
+{
+    "PlaceHolder_VCD"
+}
+
+void OutOfLineConstraint():
+{}
+{
+    "PlaceHolder_OOLC"
+}
+
+void OutOfLineRefConstraint():
+{}
+{
+    "PlaceHolder_OOLRC"
+}
+
+void SupplementalLoggingProps():
+{}
+{
+    "PlaceHolder_SLP"
+}
+
+void PhysicalProperties():
+{}
+{
+    "PlaceHolder_PP"
+}
+
+void TableProperties():
+{}
+{
+    "PlaceHolder_TP"
+}
+
+void ObjectTable():
+{}
+{
+    "PlaceHolder_OT"
+}
+
+void XMLTypeTable():
+{}
+{
+    "PlaceHolder_XTT"
 }
