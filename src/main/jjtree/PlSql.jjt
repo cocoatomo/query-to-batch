@@ -1265,6 +1265,7 @@ void ForUpdateClause():
     [ "NOWAIT" | "WAIT" SQLSimpleExpression() ]
 }
 
+// http://docs.oracle.com/cd/E16338_01/server.112/b56299/expressions001.htm#i1002626
 void SQLExpression():
 {}
 {
@@ -1563,7 +1564,7 @@ void ColumnDefinition():
 {
     TableColumn() BasicDataTypeDefinition()
     [ "SORT" ]
-    [ "DEFAULT" ]
+    [ <K_DEFAULT> SQLExpression() ]
     [ "ENCRYPT" ]
     [ (InlineConstraint())+ | InlineRefConstraint() ]
 }
