@@ -1,0 +1,31 @@
+options{
+    STATIC=false ;
+    IGNORE_CASE=true ;
+}
+
+PARSER_BEGIN(Sql)
+package co.coatomo.db;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public class Sql {
+
+    public static void main(String... args) {
+        String filename = args[0];
+        Sql parser = new Sql(new FileInputStream(filename));
+        try {
+            SimpleNode root = parser.Statement();
+            root.dump("");
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
+    }
+}
+PARSER_END(Sql)
+
+void Statement():
+{}
+{
+    "SELECT"
+}
