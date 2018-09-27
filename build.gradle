@@ -1,0 +1,27 @@
+plugins {
+  id "ca.coglinc2.javacc" version "3.0.0"
+}
+apply plugin: 'java'
+apply plugin: 'maven'
+
+group = 'net.elliptium'
+version = '1.0-SNAPSHOT'
+
+description = """query-to-batch"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+tasks.withType(JavaCompile) {
+  options.encoding = 'UTF-8'
+}
+
+
+
+repositories {
+  maven { url "http://repo.maven.apache.org/maven2" }
+}
+dependencies {
+  testCompile group: 'junit', name: 'junit', version:'3.8.1'
+}
+
