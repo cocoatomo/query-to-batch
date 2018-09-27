@@ -1,9 +1,2 @@
-*.class
-
-# Package Files #
-*.jar
-*.war
-*.ear
-
-# maven output #
-/target
+.gradle
+/build
