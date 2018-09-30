@@ -3,17 +3,17 @@ options{
     IGNORE_CASE=true ;
 }
 
-PARSER_BEGIN(Sql)
-package co.coatomo.db;
+PARSER_BEGIN(OracleSql)
+package co.coatomo.parser;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class Sql {
+public class OracleSql {
 
     public static void main(String... args) {
         String filename = args[0];
-        Sql parser = new Sql(new FileInputStream(filename));
+        OracleSql parser = new OracleSql(new FileInputStream(filename));
         try {
             SimpleNode root = parser.Statement();
             root.dump("");
@@ -22,10 +22,317 @@ public class Sql {
         }
     }
 }
-PARSER_END(Sql)
+PARSER_END(OracleSql)
+
+SKIP:
+{
+    " "
+|   "\t"
+|   "\r"
+|   "\n"
+}
+
+/* Prefix      Meaning
+    -------------------
+    K_          Keyword
+    O_          Operator
+    S_          Substitutes
+*/
+
+TOKEN: /* Keyword */
+{
+    <K_ALL: "ALL">
+|   <K_ANY: "ANY">
+|   <K_AS: "AS">
+|   <K_ASC: "ASC">
+|   <K_ASTERISK: "*">
+|   <K_AT: "@">
+|   <K_BETWEEN: "BETWEEN">
+|   <K_BREADTH: "BREADTH">
+|   <K_BY: "BY">
+|   <K_COMMA: ",">
+|   <K_CPAREN: ")">
+|   <K_CYCLE: "CYCLE">
+|   <K_DEFAULT: "DEFAULT">
+|   <K_DEPTH: "DEPTH">
+|   <K_DESC: "DESC">
+|   <K_DISTINCT: "DISTINCT">
+|   <K_DOT: ".">
+|   <K_FIRST: "FIRST">
+|   <K_FOR: "FOR">
+|   <K_FROM: "FROM">
+|   <K_IN: "IN">
+|   <K_INTERSECT: "INTERSECT">
+|   <K_LAST: "LAST">
+|   <K_LATERAL: "LATERAL">
+|   <K_MINUS: "MINUS">
+|   <K_MAXVALUE: "MAXVALUE">
+|   <K_MINVALUE: "MINVALUE">
+|   <K_NULLS: "NULLS">
+|   <K_OF: "OF">
+|   <K_ONLY: "ONLY">
+|   <K_OPAREN: "(">
+|   <K_PERIOD: "PERIOD">
+|   <K_PIVOT: "PIVOT">
+|   <K_SCN: "SCN">
+|   <K_SELECT: "SELECT">
+|   <K_SEARCH: "SEARCH">
+|   <K_SEMICOLON: ";">
+|   <K_SET: "SET">
+|   <K_TIMESTAMP: "TIMESTAMP">
+|   <K_TO: "TO">
+|   <K_UNION: "UNION">
+|   <K_UNIQUE: "UNIQUE">
+|   <K_VERSIONS: "VERSIONS">
+|   <K_WITH: "WITH">
+|   <K_XML: "XML">
+}
+
+/* DML */
 
 void Statement():
 {}
 {
-    "SELECT"
+    Select()
+}
+
+void Select():
+{}
+{
+    Subquery() [ ForUpdateClause() ] <K_SEMICOLON>
+}
+
+void Subquery():
+{}
+{
+    (
+        QueryBlock()
+        |
+        (
+            Subquery()
+            ( ( <K_UNION> [ <K_ALL> ] | <K_INTERSECT> | <K_MINUS> ) Subquery() )+
+        )
+        |
+        ( <K_OPAREN> Subquery() <K_CPAREN> )
+    )
+    [ OrderByClause() ]
+    [ RowLimitingClause() ]
+}
+
+void QueryBlock():
+{}
+{
+    [ WithClause() ]
+    <K_SELECT>
+    [ Hint() ]
+    [ <K_DISTINCT> | <K_UNIQUE> | <K_ALL> ]
+    SelectList()
+    <K_FROM>
+    FromComponent()
+    ( <K_COMMA> FromComponent() )*
+    [ WhereClause() ]
+    [ HierarchicalQueryClause() ]
+    [ GroupByClause() ]
+    [ ModelClause() ]
+}
+
+// Node for convenience sake
+void FromComponent():
+{}
+{
+    TableReference()
+    |
+    JoinClause()
+    |
+    ( <K_OPAREN> JoinClause() <K_CPAREN> )
+}
+
+void WithClause():
+{}
+{
+    <K_WITH> [ PlsqlDeclarations() ] [ SubqueryFactoringClause() ]
+}
+
+void PlsqlDeclarations():
+{}
+{
+    ( FunctionDeclaration() | ProcedureDeclaration() )+
+}
+
+void SubqueryFactoringClause():
+{}
+{
+    SubqueryFactoringComponent() ( <K_COMMA> SubqueryFactoringComponent() )*
+}
+
+// Node for convenience sake
+void SubqueryFactoringComponent():
+{}
+{
+    QueryName() [ <K_OPAREN> CAlias() ( <K_COMMA> CAlias() )* <K_CPAREN> ]
+    <K_AS> <K_OPAREN> Subquery() <K_CPAREN>
+    [ SearchClause() ]
+    [ CycleClause() ]
+}
+
+void SearchClause():
+{}
+{
+    <K_SEARCH> [ <K_DEPTH> | <K_BREADTH> ] <K_FIRST> <K_BY>
+    SearchComponent() ( <K_COMMA> SearchComponent() )*
+    <K_SET> OrderingColumn()
+}
+
+// Node for convenience sake
+void SearchComponent():
+{}
+{
+    CAlias() [ <K_ASC> | <K_DESC> ] [ <K_NULLS> ( <K_FIRST> | <K_LAST> ) ]
+}
+
+void CycleClause():
+{}
+{
+    <K_CYCLE> CAlias() ( <K_COMMA> CAlias() )*
+    <K_SET> CycleMarkCAlias() <K_TO> CycleValue() <K_DEFAULT> NoCycleValue()
+}
+
+void SelectList():
+{}
+{
+    <K_ASTERISK>
+    |
+    SelectListComponent() ( <K_COMMA> SelectListComponent() )*
+}
+
+// Node for convenience sake
+void SelectListComponent():
+{}
+{
+    (
+        QueryName()
+        |
+        (
+            [ Schema() <K_ASTERISK> ]
+            ( Table() | View() | MaterializedView() )
+        )
+        |
+        TAlias()
+    )
+    <K_DOT> <K_ASTERISK>
+    |
+    (
+        Expr() [ [ <K_AS> ] CAlias() ]
+    )
+}
+
+void TableReference():
+{}
+{
+    (
+        (
+            [ ( <K_ONLY> <K_OPAREN> QueryTableExpression() <K_CPAREN> ) | QueryTableExpression() ]
+            [ FlashbackQueryClause() ]
+            [ PivotClause() | UnpivotClause() | RowPatternClause() ]
+        )
+        |
+        ContainersClause()
+    )
+    TAlias()
+}
+
+void FlashbackQueryClause():
+{}
+{
+    (
+        <K_VERSIONS>
+        (
+            ( <K_BETWEEN> ( <K_SCN> | <K_TIMESTAMP> ) )
+            |
+            ( <K_PERIOD> <K_FOR> ValidTimeColumn() <K_BETWEEN> )
+        )
+        ( Expr() | <K_MINVALUE> ) <K_AND> ( Expr() | <K_MAXVALUE> )
+    )
+    |
+    (
+        <K_AS> <K_OF>
+        (
+            ( ( <K_SCN> | <K_TIMESTAMP> ) Expr() )
+            |
+            ( <K_PERIOD> <K_FOR> ValidTimeColumn() Expr() )
+        )
+    )
+}
+
+void QueryTableExpression():
+{}
+{
+    QueryName()
+    |
+    (
+        [ Schema() <K_DOT> ]
+        (
+            (
+                Table()
+                [ PartitionExtensionClause() | <K_AT> Dblink() ]
+            )
+            |
+            (
+                ( View() | MaterializedView() )
+                [ <K_AT> Dblink() ]
+            )
+        )
+        [ SampleClause() ]
+    )
+    |
+    (
+        [ <K_LATERAL> ] <K_OPAREN> Subquery() [ SubqueryRestrictionClause() ] <K_CPAREN>
+    )
+    |
+    TableCollectionExpression()
+}
+
+void PivotClause():
+{}
+{
+    <K_PIVOT> [ <K_XML> ]
+    <K_OPAREN> PivotComponent() ( <K_COMMA> PivotComponent() )*
+    PivotForClause()
+    PivotInClause()
+    <K_CPAREN>
+}
+
+// Node for convenience sake
+void PivotComponent():
+{}
+{
+    AggregateFunction() <K_OPAREN> Expr() <K_CPAREN> [ [ <K_AS> ] Alias() ]
+}
+
+void PivotForClause():
+{}
+{
+    <K_FOR> ( Column() | <K_OPAREN> Column() ( <K_COMMA> Column() )* <K_CPAREN> )
+}
+
+void PivotInClause():
+{}
+{
+    <K_IN> <K_OPAREN>
+    (
+        (
+            PivotInComponent() ( <K_COMMA> PivotInComponent() )*
+        )
+        |
+        Subquery()
+        |
+        <K_ANY> ( <K_COMMA> <K_ANY> )*
+    )
+}
+
+// Node for convenience sake
+void PivotInComponent():
+{}
+{
+    ( Expr() | <K_OPAREN> Expr() ( <K_COMMA> Expr() )* <K_CPAREN> ) [ [ <K_AS> ] Alias() ]
 }
