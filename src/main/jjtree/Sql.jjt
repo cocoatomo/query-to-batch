@@ -43,47 +43,93 @@ TOKEN: /* Keyword */
 {
     <K_ALL: "ALL">
 |   <K_ANY: "ANY">
+|   <K_APPLY: "APPLY">
 |   <K_AS: "AS">
 |   <K_ASC: "ASC">
 |   <K_ASTERISK: "*">
 |   <K_AT: "@">
 |   <K_BETWEEN: "BETWEEN">
+|   <K_BLOCK: "BLOCK">
 |   <K_BREADTH: "BREADTH">
 |   <K_BY: "BY">
+|   <K_CHECK: "CHECK">
 |   <K_COMMA: ",">
+|   <K_CONNECT: "CONNECT">
+|   <K_CONSTRAINT: "CONSTRAINT">
+|   <K_CONTAINERS: "CONTAINERS">
 |   <K_CPAREN: ")">
+|   <K_CROSS: "CROSS">
+|   <K_CUBE: "CUBE">
 |   <K_CYCLE: "CYCLE">
 |   <K_DEFAULT: "DEFAULT">
 |   <K_DEPTH: "DEPTH">
 |   <K_DESC: "DESC">
+|   <K_DIMENSION: "DIMENSION">
 |   <K_DISTINCT: "DISTINCT">
 |   <K_DOT: ".">
+|   <K_EXCLUDE: "EXCLUDE">
 |   <K_FIRST: "FIRST">
 |   <K_FOR: "FOR">
 |   <K_FROM: "FROM">
+|   <K_FULL: "FULL">
+|   <K_GROUP: "GROUP">
+|   <K_GROUPING: "GROUPING">
+|   <K_HAVING: "HAVING">
+|   <K_IGNORE: "IGNORE">
 |   <K_IN: "IN">
+|   <K_INCLUDE: "INCLUDE">
+|   <K_INNER: "INNER">
 |   <K_INTERSECT: "INTERSECT">
+|   <K_JOIN: "JOIN">
+|   <K_KEEP: "KEEP">
 |   <K_LAST: "LAST">
 |   <K_LATERAL: "LATERAL">
+|   <K_LEFT: "LEFT">
 |   <K_MINUS: "MINUS">
 |   <K_MAXVALUE: "MAXVALUE">
 |   <K_MINVALUE: "MINVALUE">
+|   <K_MODEL: "MODEL">
+|   <K_NATURAL: "NATURAL">
+|   <K_NAV: "NAV">
+|   <K_NOCYCLE: "NOCYCLE">
 |   <K_NULLS: "NULLS">
 |   <K_OF: "OF">
+|   <K_ON: "ON">
 |   <K_ONLY: "ONLY">
+|   <K_OUTER: "OUTER">
 |   <K_OPAREN: "(">
+|   <K_OPTION: "OPTION">
+|   <K_PARTITION: "PARTITION">
 |   <K_PERIOD: "PERIOD">
 |   <K_PIVOT: "PIVOT">
+|   <K_PLUS: "+">
+|   <K_READ: "READ">
+|   <K_REFERENCE: "REFERENCE">
+|   <K_RETURN: "RETURN">
+|   <K_RIGHT: "RIGHT">
+|   <K_ROLLUP: "ROLLUP">
+|   <K_ROWS: "ROWS">
+|   <K_SAMPLE: "SAMPLE">
 |   <K_SCN: "SCN">
+|   <K_SEED: "SEED">
 |   <K_SELECT: "SELECT">
 |   <K_SEARCH: "SEARCH">
 |   <K_SEMICOLON: ";">
 |   <K_SET: "SET">
+|   <K_SETS: "SETS">
+|   <K_SINGLE: "SINGLE">
+|   <K_START: "START">
+|   <K_SUBPARTITION: "SUBPARTITION">
+|   <K_TABLE: "TABLE">
 |   <K_TIMESTAMP: "TIMESTAMP">
 |   <K_TO: "TO">
 |   <K_UNION: "UNION">
 |   <K_UNIQUE: "UNIQUE">
+|   <K_UNPIVOT: "UNPIVOT">
+|   <K_UPDATED: "UPDATED">
+|   <K_USING: "USING">
 |   <K_VERSIONS: "VERSIONS">
+|   <K_WHERE: "WHERE">
 |   <K_WITH: "WITH">
 |   <K_XML: "XML">
 }
@@ -230,11 +276,9 @@ void TableReference():
 {}
 {
     (
-        (
-            [ ( <K_ONLY> <K_OPAREN> QueryTableExpression() <K_CPAREN> ) | QueryTableExpression() ]
-            [ FlashbackQueryClause() ]
-            [ PivotClause() | UnpivotClause() | RowPatternClause() ]
-        )
+        [ ( <K_ONLY> <K_OPAREN> QueryTableExpression() <K_CPAREN> ) | QueryTableExpression() ]
+        [ FlashbackQueryClause() ]
+        [ PivotClause() | UnpivotClause() | RowPatternClause() ]
         |
         ContainersClause()
     )
@@ -247,9 +291,9 @@ void FlashbackQueryClause():
     (
         <K_VERSIONS>
         (
-            ( <K_BETWEEN> ( <K_SCN> | <K_TIMESTAMP> ) )
+            <K_BETWEEN> ( <K_SCN> | <K_TIMESTAMP> )
             |
-            ( <K_PERIOD> <K_FOR> ValidTimeColumn() <K_BETWEEN> )
+            <K_PERIOD> <K_FOR> ValidTimeColumn() <K_BETWEEN>
         )
         ( Expr() | <K_MINVALUE> ) <K_AND> ( Expr() | <K_MAXVALUE> )
     )
@@ -257,9 +301,9 @@ void FlashbackQueryClause():
     (
         <K_AS> <K_OF>
         (
-            ( ( <K_SCN> | <K_TIMESTAMP> ) Expr() )
+            ( <K_SCN> | <K_TIMESTAMP> ) Expr()
             |
-            ( <K_PERIOD> <K_FOR> ValidTimeColumn() Expr() )
+            <K_PERIOD> <K_FOR> ValidTimeColumn() Expr()
         )
     )
 }
@@ -272,15 +316,9 @@ void QueryTableExpression():
     (
         [ Schema() <K_DOT> ]
         (
-            (
-                Table()
-                [ PartitionExtensionClause() | <K_AT> Dblink() ]
-            )
+            Table() [ PartitionExtensionClause() | <K_AT> Dblink() ]
             |
-            (
-                ( View() | MaterializedView() )
-                [ <K_AT> Dblink() ]
-            )
+            ( View() | MaterializedView() ) [ <K_AT> Dblink() ]
         )
         [ SampleClause() ]
     )
@@ -335,4 +373,207 @@ void PivotInComponent():
 {}
 {
     ( Expr() | <K_OPAREN> Expr() ( <K_COMMA> Expr() )* <K_CPAREN> ) [ [ <K_AS> ] Alias() ]
+}
+
+void UnpivotClause():
+{}
+{
+    <K_UNPIVOT> [ ( <K_INCLUDE> | <K_EXCLUDE> ) <K_NULLS> ]
+    <K_OPAREN> ( Column() | <K_OPAREN> Column() ( <K_COMMA> Column() )*  <K_CPAREN> )
+    PivotForClause() UnpivotInClause() <K_CPAREN>
+}
+
+void UnpivotInClause():
+{}
+{
+    <K_IN> <K_OPAREN> UnpivotInComponent() ( <K_COMMA> UnpivotInComponent() )* <K_CPAREN>
+}
+
+// Node for convenience sake
+void UnpivotInComponent():
+{}
+{
+    ( Column() | <K_OPAREN> Column() ( <K_COMMA> Column() )*  <K_CPAREN> )
+    [ <K_AS> ( Literal() | <K_OPAREN> Literal() ( <K_COMMA> Literal() )*  <K_CPAREN> ) ]
+}
+
+void SampleClause():
+{}
+{
+    <K_SAMPLE> [ <K_BLOCK> ] <K_OPAREN> SamplePercent() <K_CPAREN>
+    [ <K_SEED> <K_OPAREN> SeedValue() <K_CPAREN> ]
+}
+
+void PartitionExtensionClause():
+{}
+{
+    (
+        <K_PARTITION>
+        (
+            <K_OPAREN> Partition() <K_CPAREN>
+            |
+            <K_FOR> <K_OPAREN> PartitionKeyValue() ( <K_COMMA> PartitionKeyValue() )* <K_CPAREN>
+        )
+    )
+    |
+    (
+        <K_SUBPARTITION>
+        (
+            <K_OPAREN> Subpartition() <K_CPAREN>
+            |
+            <K_FOR> <K_OPAREN> SubpartitionKeyValue() ( <K_COMMA> SubpartitionKeyValue() )* <K_CPAREN>
+        )
+    )
+}
+
+void SubqueryRestrictionClause():
+{}
+{
+    <K_WITH> ( <K_READ> <K_ONLY> | <K_CHECK> <K_OPTION> ) [ <K_CONSTRAINT> Constraint() ]
+}
+
+void TableCollectionExpression():
+{}
+{
+    <K_TABLE> <K_OPAREN> CollectionExpression() <K_CPAREN> [ <K_TABLE> <K_PLUS> <K_CPAREN> ]
+}
+
+void ContainersClause():
+{}
+{
+    <K_CONTAINERS> <K_OPAREN> [ Schema() <K_DOT> ] ( Table() | View() ) <K_CPAREN>
+}
+
+void JoinClause():
+{}
+{
+    TableReference() ( InnerCrossJoinClause() | OuterJoinClause() | CrossOuterApplyClause() )+
+}
+
+void InnerCrossJoinClause():
+{}
+{
+    [ <K_INNER> ] <K_JOIN> TableReference()
+    ( <K_ON> Condition() | <K_USING> <K_OPAREN> Column() ( <K_COMMA> Column() )* <K_CPAREN> )
+    |
+    ( <K_CROSS> | <K_NATURAL> [ <K_INNER> ] ) <K_JOIN> TableReference()
+}
+
+void OuterJoinClause():
+{}
+{
+    [ QueryPartitionClause() ] [ <K_NATURAL> ] OuterJoinType() <K_JOIN>
+    TableReference() [ QueryPartitionClause() ]
+    [ <K_ON> Condition() | <K_USING> <K_OPAREN> Column() ( <K_COMMA> Column() )* <K_CPAREN> ]
+}
+
+QueryPartitionClause():
+{}
+{
+    <K_PARTITION> <K_BY>
+    ( Expr() ( <K_COMMA> Expr() )* | <K_OPAREN> Expr() ( <K_COMMA> Expr() )* <K_CPAREN> )
+}
+
+OuterJoinType():
+{}
+{
+    ( <K_FULL> | <K_LEFT> | <K_RIGHT> ) [ <K_OUTER> ]
+}
+
+CrossOuterApplyClause():
+{}
+{
+    ( <K_CROSS> | <K_OUTER> ) <K_APPLY> ( TableReference() | CollectionExpression() )
+}
+
+WhereClause():
+{}
+{
+    <K_WHERE> Condition()
+}
+
+HierarchicalQueryClause():
+{}
+{
+    <K_CONNECT> <K_BY> [ <K_NOCYCLE> ] Condition() [ <K_START> <K_WITH> Condition() ]
+    |
+    <K_START> <K_WITH> Condition() <K_CONNECT> <K_BY> [ <K_NOCYCLE> ] Condition()
+}
+
+GroupByClause():
+{}
+{
+    <K_GROUP> <K_BY> GroupByComponent() ( <K_COMMA> GroupByComponent() )* [ <K_HAVING> Condition() ]
+}
+
+// Node for convenience sake
+GroupByComponent():
+{}
+{
+    Expr() | RollupCubeClause() | GroupingSetsClause()
+}
+
+RollupCubeClause():
+{}
+{
+    ( <K_ROLLUP> | <K_CUBE> ) <K_OPAREN> GroupingExpressionList() <K_CPAREN>
+}
+
+GroupingSetsClause():
+{}
+{
+    <K_GROUPING> <K_SETS> <K_OPAREN> GroupingSetsComponent() ( <K_COMMA> GroupingSetsComponent() )* <K_CPAREN>
+}
+
+// Node for convenience sake
+GroupingSetsComponent():
+{}
+{
+    RollupCubeClause() | GroupingExpressionList()
+}
+
+GroupingExpressionList():
+{}
+{
+    ExpressionList() ( <K_COMMA> ExpressionList() )*
+}
+
+ExpressionList():
+{}
+{
+    Expr() ( <K_COMMA> Expr() )*
+    |
+    <K_OPAREN> [ Expr() ] ( <K_COMMA> [ Expr() ] )* <K_CPAREN>
+}
+
+ModelClause():
+{}
+{
+    <K_MODEL> [ CellReferenceOptions() ] [ ReturnRowsClause() ] [ ( ReferenceModel() )+ ] MainModel()
+}
+
+CellReferenceOptions():
+{}
+{
+    [ ( <K_IGNORE> | <K_KEEP> ) <K_NAV> ]
+    [ <K_UNIQUE> ( <K_DIMENSION> | <K_SINGLE> <K_REFERENCE> ) ]
+}
+
+ReturnRowsClause():
+{}
+{
+    <K_RETURN> ( <K_UPDATED> | <K_ALL> ) <K_ROWS>
+}
+
+ReferenceModel():
+{}
+{
+    <K_REFERENCE> ReferenceModelName() <K_ON> <K_OPAREN> Subquery() <K_CPAREN>
+    ModelColumnClause() [ CellReferenceOptions() ]
+}
+
+MainModel():
+{}
+{
+
 }
