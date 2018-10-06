@@ -41,17 +41,22 @@ SKIP:
 
 TOKEN: /* Keyword */
 {
-    <K_ALL: "ALL">
+    <K_AFTER: "AFTER">
+|   <K_ALL: "ALL">
 |   <K_ANY: "ANY">
 |   <K_APPLY: "APPLY">
 |   <K_AS: "AS">
 |   <K_ASC: "ASC">
 |   <K_ASTERISK: "*">
 |   <K_AT: "@">
+|   <K_AUTOMATIC: "AUTOMATIC">
+|   <K_BAR: "|">
 |   <K_BETWEEN: "BETWEEN">
 |   <K_BLOCK: "BLOCK">
 |   <K_BREADTH: "BREADTH">
 |   <K_BY: "BY">
+|   <K_CARET: "^">
+|   <K_CBRACE: "}">
 |   <K_CHECK: "CHECK">
 |   <K_COMMA: ",">
 |   <K_CONNECT: "CONNECT">
@@ -59,15 +64,21 @@ TOKEN: /* Keyword */
 |   <K_CONTAINERS: "CONTAINERS">
 |   <K_CPAREN: ")">
 |   <K_CROSS: "CROSS">
+|   <K_CSQBRACKET: "]">
 |   <K_CUBE: "CUBE">
 |   <K_CYCLE: "CYCLE">
+|   <K_DECREMENT: "DECREMENT">
 |   <K_DEFAULT: "DEFAULT">
+|   <K_DEFINE: "DEFINE">
 |   <K_DEPTH: "DEPTH">
 |   <K_DESC: "DESC">
 |   <K_DIMENSION: "DIMENSION">
 |   <K_DISTINCT: "DISTINCT">
+|   <K_DOLLAR: "$">
 |   <K_DOT: ".">
+|   <K_EQ: "=">
 |   <K_EXCLUDE: "EXCLUDE">
+|   <K_FETCH: "FETCH">
 |   <K_FIRST: "FIRST">
 |   <K_FOR: "FOR">
 |   <K_FROM: "FROM">
@@ -75,17 +86,24 @@ TOKEN: /* Keyword */
 |   <K_GROUP: "GROUP">
 |   <K_GROUPING: "GROUPING">
 |   <K_HAVING: "HAVING">
+|   <K_HYPHEN: "-">
 |   <K_IGNORE: "IGNORE">
 |   <K_IN: "IN">
 |   <K_INCLUDE: "INCLUDE">
 |   <K_INNER: "INNER">
 |   <K_INTERSECT: "INTERSECT">
+|   <K_INCREMENT: "INCREMENT">
+|   <K_ITERATE: "ITERATE">
 |   <K_JOIN: "JOIN">
 |   <K_KEEP: "KEEP">
 |   <K_LAST: "LAST">
 |   <K_LATERAL: "LATERAL">
 |   <K_LEFT: "LEFT">
+|   <K_LIKE: "LIKE">
+|   <K_LOCKED: "LOCKED">
 |   <K_MAIN: "MAIN">
+|   <K_MATCH: "MATCH">
+|   <K_MATCH_RECOGNIZE: "MATCH_RECOGNIZE">
 |   <K_MEASURES: "MEASURES">
 |   <K_MINUS: "MINUS">
 |   <K_MAXVALUE: "MAXVALUE">
@@ -93,23 +111,37 @@ TOKEN: /* Keyword */
 |   <K_MODEL: "MODEL">
 |   <K_NATURAL: "NATURAL">
 |   <K_NAV: "NAV">
+|   <K_NEXT: "NEXT">
 |   <K_NOCYCLE: "NOCYCLE">
+|   <K_NOWAIT: "NOWAIT">
 |   <K_NULLS: "NULLS">
+|   <K_OBRACE: "{">
 |   <K_OF: "OF">
+|   <K_OFFSET: "OFFSET">
 |   <K_ON: "ON">
 |   <K_ONLY: "ONLY">
 |   <K_OUTER: "OUTER">
 |   <K_OPAREN: "(">
 |   <K_OPTION: "OPTION">
+|   <K_ORDER: "ORDER">
+|   <K_OSQBRACKET: "[">
 |   <K_PARTITION: "PARTITION">
+|   <K_PAST: "PAST">
+|   <K_PATTERN: "PATTERN">
+|   <K_PER: "PER">
+|   <K_PERCENT: "PERCENT">
 |   <K_PERIOD: "PERIOD">
+|   <K_PERMUTE: "PERMUTE">
 |   <K_PIVOT: "PIVOT">
 |   <K_PLUS: "+">
+|   <K_QUESTION: "?">
 |   <K_READ: "READ">
 |   <K_REFERENCE: "REFERENCE">
 |   <K_RETURN: "RETURN">
 |   <K_RIGHT: "RIGHT">
+|   <K_RULES: "RULES">
 |   <K_ROLLUP: "ROLLUP">
+|   <K_ROW: "ROW">
 |   <K_ROWS: "ROWS">
 |   <K_SAMPLE: "SAMPLE">
 |   <K_SCN: "SCN">
@@ -119,18 +151,26 @@ TOKEN: /* Keyword */
 |   <K_SEMICOLON: ";">
 |   <K_SET: "SET">
 |   <K_SETS: "SETS">
+|   <K_SEQUENTIAL: "SEQUENTIAL">
+|   <K_SIBLINGS: "SIBLINGS">
 |   <K_SINGLE: "SINGLE">
+|   <K_SKIP: "SKIP">
 |   <K_START: "START">
 |   <K_SUBPARTITION: "SUBPARTITION">
 |   <K_TABLE: "TABLE">
+|   <K_TIES: "TIES">
 |   <K_TIMESTAMP: "TIMESTAMP">
 |   <K_TO: "TO">
 |   <K_UNION: "UNION">
 |   <K_UNIQUE: "UNIQUE">
 |   <K_UNPIVOT: "UNPIVOT">
+|   <K_UNTIL: "UNTIL">
+|   <K_UPDATE: "UPDATE">
 |   <K_UPDATED: "UPDATED">
+|   <K_UPSERT: "UPSERT">
 |   <K_USING: "USING">
 |   <K_VERSIONS: "VERSIONS">
+|   <K_WAIT: "WAIT">
 |   <K_WHERE: "WHERE">
 |   <K_WITH: "WITH">
 |   <K_XML: "XML">
@@ -592,3 +632,214 @@ void ModelColumnClauses():
     <K_MEASURES> <K_OPAREN> Expr() [ CAlias() ] ( <K_COMMA> Expr() [ CAlias() ] )* <K_CPAREN>
 }
 
+void ModelRulesClause():
+{}
+{
+    [ <K_RULES> [ <K_UPDATE> | <K_UPSERT> [ <K_ALL> ] ] [ [ <K_AUTOMATIC> | <K_SEQUENTIAL> ] <K_ORDER> ] [ ModelIterateClause() ] ]
+    <K_OPAREN> ModelRulesComponent() ( <K_COMMA> ModelRulesComponent() )* <K_CPAREN>
+}
+
+// Node for convenience sake
+void ModelRulesComponent():
+{}
+{
+    [ <K_UPDATE> | <K_UPSERT> [ <K_ALL> ] ] CellAssignment() [ OrderByClause() ] <K_EQ> Expr()
+}
+
+void ModelIterateClause():
+{}
+{
+    <K_ITERATE> <K_OPAREN> Number() <K_CPAREN> [ <K_UNTIL> <K_OPAREN> Condition() <K_CPAREN> ]
+}
+
+void CellAssignment():
+{}
+{
+    MeasureColumn() <K_OSQBRACKET>
+    (
+        ( Condition() | Expr() | SingleColumnForLoop() ) ( <K_COMMA> ( Condition() | Expr() | SingleColumnForLoop() ) )*
+        |
+        MultiColumnForLoop()
+    )
+    <K_CSQBRACKET>
+}
+
+void SingleColumnForLoop():
+{}
+{
+    <K_FOR> DimensionColumn()
+    (
+        <K_IN> <K_OPAREN> ( Literal() ( <K_COMMA> Literal() )* | Subquery() ) <K_CPAREN>
+        |
+        [ <K_LIKE> Pattern() ] <K_FROM> Literal() <K_TO> Literal() ( <K_INCREMENT> | <K_DECREMENT> ) Literal()
+    )
+}
+
+void MultiColumnForLoop():
+{}
+{
+    <K_FOR> <K_OPAREN> DimensionColumn() ( <K_COMMA> DimensionColumn() )* <K_CPAREN>
+    <K_IN> <K_OPAREN> ( MultiColumnComponent() ( <K_COMMA> MultiColumnComponent() )* ) <K_CPAREN>
+}
+
+// Node for convenience sake
+void MultiColumnComponent():
+{}
+{
+    <K_OPAREN> Literal() ( <K_COMMA> Literal() )* <K_CPAREN>
+}
+
+void OrderByClause():
+{}
+{
+    <K_ORDER> [ <K_SIBLINGS> ] <K_BY> OrderByComponent() ( <K_COMMA> OrderByComponent() )*
+}
+
+// Node for convenience sake
+void OrderByComponent():
+{}
+{
+    ( Expr() | Position() | CAlias() ) [ <K_ASC> | <K_DESC> ] [ <K_NULLS> <K_FIRST> | <K_NULLS> <K_LAST> ]
+}
+
+void RowLimitingClause():
+{}
+{
+    [ <K_OFFSET> Offset() ( <K_ROW> | <K_ROWS> ) ]
+    [ <K_FETCH> ( <K_FIRST> | <K_NEXT> ) [ Rowcount() | Percent() <K_PERCENT> ] ]
+    ( <K_ROW> | <K_ROWS> ) ( <K_ONLY> | <K_WITH> <K_TIES> )
+}
+
+void ForUpdateClause():
+{}
+{
+    <K_FOR> <K_UPDATE>
+    [ <K_OF> ForUpdateComponent() ( <K_COMMA> ForUpdateComponent() )* ]
+    [ ( ( <K_NOWAIT> | <K_WAIT> Integer() ) | <K_SKIP> <K_LOCKED> ) ]
+}
+
+// Node for convenience sake
+void ForUpdateComponent():
+{}
+{
+    [ [ Schema() <K_DOT> ] ( Table() | View() ) <K_DOT> ] Column()
+}
+
+void RowPatternClause():
+{}
+{
+    <K_MATCH_RECOGNIZE> <K_OPAREN> [ RowPatternPartitionBy() ] [ RowPatternOrderBy() ] [ RowPatternMeasures() ]
+    [ RowPatternRowsPerMatch() ] [ RowPatternSkipTo() ] <K_PATTERN> <K_OPAREN> RowPattern() <K_CPAREN>
+    [ RowPatternSubsetClause() ] <K_DEFINE> RowPatternDefinitionList() <K_CPAREN>
+}
+
+void RowPatternPartitionBy():
+{}
+{
+    <K_PARTITION> <K_BY> Column() ( <K_COMMA> Column() )*
+}
+
+void RowPatternOrderBy():
+{}
+{
+    <K_ORDER> <K_BY> Column() ( <K_COMMA> Column() )*
+}
+
+void RowPatternMeasures():
+{}
+{
+    <K_MEASURES> RowPatternMeasureColumn() ( <K_COMMA> RowPatternMeasureColumn() )*
+}
+
+void RowPatternMeasureColumn():
+{}
+{
+    Expr() <K_AS> CAlias()
+}
+
+void RowPatternRowsPerMatch():
+{}
+{
+    ( <K_ONE> <K_ROW> | <K_ALL> <K_ROWS> ) <K_PER> <K_MATCH>
+}
+
+void RowPatternSkipTo():
+{}
+{
+    <K_AFTER> <K_MATCH> <K_SKIP>
+    (
+        ( <K_TO> <K_NEXT> | <K_PAST> <K_LAST> ) <K_ROW>
+        |
+        <K_TO> [ <K_FIRST> | <K_LAST> ] VarialbeName()
+    )
+}
+
+/* LL cannot handle following original definitions
+void RowPattern():
+{}
+{
+    [ RowPattern() <K_BAR> ] RowPatternTerm()
+}
+
+void RowPatternTerm():
+{}
+{
+    [ RowPatternTerm() ] RowPatternFactor()
+}
+*/
+
+void RowPattern():
+{}
+{
+    RowPatternTerm() ( <K_BAR> RowPatternTerm() )*
+}
+
+void RowPatternTerm():
+{}
+{
+    ( RowPatternFactor() )*
+}
+
+void RowPatternFactor():
+{}
+{
+    RowPatternPrimary() [ RowPatternQuantifier() ]
+}
+
+void RowPatternPrimary():
+{}
+{
+    VarialbeName()
+    |
+    <K_DOLLAR>
+    |
+    <K_CARET>
+    |
+    <K_OPAREN> [ RowPattern() ] <K_CPAREN>
+    |
+    <K_OBRACE> <K_HYPHEN> RowPattern() <K_HYPHEN> <K_CBRACE>
+    |
+    RowPatternPermute()
+}
+
+void RowPatternPermute():
+{}
+{
+    <K_PERMUTE> <K_OPAREN> RowPattern() ( <K_COMMA> RowPattern() )* <K_CPAREN>
+}
+
+void RowPatternQuantifier():
+{}
+{
+    <K_ASTERISK> [ <K_QUESTION> ]
+    |
+    <K_PLUS> [ <K_QUESTION> ]
+    |
+    <K_QUESTION> [ <K_QUESTION> ]
+    |
+    (
+        <K_OBRACE> [ UnsignedInteger() ] <K_COMMA> [ UnsignedInteger() ] <K_CBRACE> [ <K_QUESTION> ]
+        |
+        <K_OBRACE> UnsignedInteger() <K_CBRACE>
+    )
+}
