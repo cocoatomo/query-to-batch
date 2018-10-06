@@ -85,6 +85,8 @@ TOKEN: /* Keyword */
 |   <K_LAST: "LAST">
 |   <K_LATERAL: "LATERAL">
 |   <K_LEFT: "LEFT">
+|   <K_MAIN: "MAIN">
+|   <K_MEASURES: "MEASURES">
 |   <K_MINUS: "MINUS">
 |   <K_MAXVALUE: "MAXVALUE">
 |   <K_MINVALUE: "MINVALUE">
@@ -133,6 +135,10 @@ TOKEN: /* Keyword */
 |   <K_WITH: "WITH">
 |   <K_XML: "XML">
 }
+
+/* Expressions */
+
+/* Conditions */
 
 /* DML */
 
@@ -467,32 +473,32 @@ void OuterJoinClause():
     [ <K_ON> Condition() | <K_USING> <K_OPAREN> Column() ( <K_COMMA> Column() )* <K_CPAREN> ]
 }
 
-QueryPartitionClause():
+void QueryPartitionClause():
 {}
 {
     <K_PARTITION> <K_BY>
     ( Expr() ( <K_COMMA> Expr() )* | <K_OPAREN> Expr() ( <K_COMMA> Expr() )* <K_CPAREN> )
 }
 
-OuterJoinType():
+void OuterJoinType():
 {}
 {
     ( <K_FULL> | <K_LEFT> | <K_RIGHT> ) [ <K_OUTER> ]
 }
 
-CrossOuterApplyClause():
+void CrossOuterApplyClause():
 {}
 {
     ( <K_CROSS> | <K_OUTER> ) <K_APPLY> ( TableReference() | CollectionExpression() )
 }
 
-WhereClause():
+void WhereClause():
 {}
 {
     <K_WHERE> Condition()
 }
 
-HierarchicalQueryClause():
+void HierarchicalQueryClause():
 {}
 {
     <K_CONNECT> <K_BY> [ <K_NOCYCLE> ] Condition() [ <K_START> <K_WITH> Condition() ]
@@ -500,45 +506,45 @@ HierarchicalQueryClause():
     <K_START> <K_WITH> Condition() <K_CONNECT> <K_BY> [ <K_NOCYCLE> ] Condition()
 }
 
-GroupByClause():
+void GroupByClause():
 {}
 {
     <K_GROUP> <K_BY> GroupByComponent() ( <K_COMMA> GroupByComponent() )* [ <K_HAVING> Condition() ]
 }
 
 // Node for convenience sake
-GroupByComponent():
+void GroupByComponent():
 {}
 {
     Expr() | RollupCubeClause() | GroupingSetsClause()
 }
 
-RollupCubeClause():
+void RollupCubeClause():
 {}
 {
     ( <K_ROLLUP> | <K_CUBE> ) <K_OPAREN> GroupingExpressionList() <K_CPAREN>
 }
 
-GroupingSetsClause():
+void GroupingSetsClause():
 {}
 {
     <K_GROUPING> <K_SETS> <K_OPAREN> GroupingSetsComponent() ( <K_COMMA> GroupingSetsComponent() )* <K_CPAREN>
 }
 
 // Node for convenience sake
-GroupingSetsComponent():
+void GroupingSetsComponent():
 {}
 {
     RollupCubeClause() | GroupingExpressionList()
 }
 
-GroupingExpressionList():
+void GroupingExpressionList():
 {}
 {
     ExpressionList() ( <K_COMMA> ExpressionList() )*
 }
 
-ExpressionList():
+void ExpressionList():
 {}
 {
     Expr() ( <K_COMMA> Expr() )*
@@ -546,34 +552,43 @@ ExpressionList():
     <K_OPAREN> [ Expr() ] ( <K_COMMA> [ Expr() ] )* <K_CPAREN>
 }
 
-ModelClause():
+void ModelClause():
 {}
 {
     <K_MODEL> [ CellReferenceOptions() ] [ ReturnRowsClause() ] [ ( ReferenceModel() )+ ] MainModel()
 }
 
-CellReferenceOptions():
+void CellReferenceOptions():
 {}
 {
     [ ( <K_IGNORE> | <K_KEEP> ) <K_NAV> ]
     [ <K_UNIQUE> ( <K_DIMENSION> | <K_SINGLE> <K_REFERENCE> ) ]
 }
 
-ReturnRowsClause():
+void ReturnRowsClause():
 {}
 {
     <K_RETURN> ( <K_UPDATED> | <K_ALL> ) <K_ROWS>
 }
 
-ReferenceModel():
+void ReferenceModel():
 {}
 {
     <K_REFERENCE> ReferenceModelName() <K_ON> <K_OPAREN> Subquery() <K_CPAREN>
     ModelColumnClause() [ CellReferenceOptions() ]
 }
 
-MainModel():
+void MainModel():
 {}
 {
-
+    [ <K_MAIN> MainModelName() ] ModelColumnClause() [ CellReferenceOptions() ] ModelRulesClause()
 }
+
+void ModelColumnClauses():
+{}
+{
+    [ <K_PARTITION> <K_BY> <K_OPAREN> Expr() [ CAlias() ] ( <K_COMMA> Expr() [ CAlias() ] )* <K_CPAREN> ]
+    <K_DIMENSION> <K_BY> <K_OPAREN> Expr() [ CAlias() ] ( <K_COMMA> Expr() [ CAlias() ] )* <K_CPAREN>
+    <K_MEASURES> <K_OPAREN> Expr() [ CAlias() ] ( <K_COMMA> Expr() [ CAlias() ] )* <K_CPAREN>
+}
+
