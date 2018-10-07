@@ -182,19 +182,19 @@ TOKEN: /* Keyword */
 
 /* DML */
 
-void Statement():
+void Statement() :
 {}
 {
     Select()
 }
 
-void Select():
+void Select() :
 {}
 {
     Subquery() [ ForUpdateClause() ] <K_SEMICOLON>
 }
 
-void Subquery():
+void Subquery() :
 {}
 {
     (
@@ -211,7 +211,7 @@ void Subquery():
     [ RowLimitingClause() ]
 }
 
-void QueryBlock():
+void QueryBlock() :
 {}
 {
     [ WithClause() ]
@@ -229,7 +229,7 @@ void QueryBlock():
 }
 
 // Node for convenience sake
-void FromComponent():
+void FromComponent() :
 {}
 {
     TableReference()
@@ -239,26 +239,26 @@ void FromComponent():
     ( <K_OPAREN> JoinClause() <K_CPAREN> )
 }
 
-void WithClause():
+void WithClause() :
 {}
 {
     <K_WITH> [ PlsqlDeclarations() ] [ SubqueryFactoringClause() ]
 }
 
-void PlsqlDeclarations():
+void PlsqlDeclarations() :
 {}
 {
     ( FunctionDeclaration() | ProcedureDeclaration() )+
 }
 
-void SubqueryFactoringClause():
+void SubqueryFactoringClause() :
 {}
 {
     SubqueryFactoringComponent() ( <K_COMMA> SubqueryFactoringComponent() )*
 }
 
 // Node for convenience sake
-void SubqueryFactoringComponent():
+void SubqueryFactoringComponent() :
 {}
 {
     QueryName() [ <K_OPAREN> CAlias() ( <K_COMMA> CAlias() )* <K_CPAREN> ]
@@ -267,7 +267,7 @@ void SubqueryFactoringComponent():
     [ CycleClause() ]
 }
 
-void SearchClause():
+void SearchClause() :
 {}
 {
     <K_SEARCH> [ <K_DEPTH> | <K_BREADTH> ] <K_FIRST> <K_BY>
@@ -276,20 +276,20 @@ void SearchClause():
 }
 
 // Node for convenience sake
-void SearchComponent():
+void SearchComponent() :
 {}
 {
     CAlias() [ <K_ASC> | <K_DESC> ] [ <K_NULLS> ( <K_FIRST> | <K_LAST> ) ]
 }
 
-void CycleClause():
+void CycleClause() :
 {}
 {
     <K_CYCLE> CAlias() ( <K_COMMA> CAlias() )*
     <K_SET> CycleMarkCAlias() <K_TO> CycleValue() <K_DEFAULT> NoCycleValue()
 }
 
-void SelectList():
+void SelectList() :
 {}
 {
     <K_ASTERISK>
@@ -298,7 +298,7 @@ void SelectList():
 }
 
 // Node for convenience sake
-void SelectListComponent():
+void SelectListComponent() :
 {}
 {
     (
@@ -318,7 +318,7 @@ void SelectListComponent():
     )
 }
 
-void TableReference():
+void TableReference() :
 {}
 {
     (
@@ -331,7 +331,7 @@ void TableReference():
     TAlias()
 }
 
-void FlashbackQueryClause():
+void FlashbackQueryClause() :
 {}
 {
     (
@@ -354,7 +354,7 @@ void FlashbackQueryClause():
     )
 }
 
-void QueryTableExpression():
+void QueryTableExpression() :
 {}
 {
     QueryName()
@@ -376,7 +376,7 @@ void QueryTableExpression():
     TableCollectionExpression()
 }
 
-void PivotClause():
+void PivotClause() :
 {}
 {
     <K_PIVOT> [ <K_XML> ]
@@ -387,19 +387,19 @@ void PivotClause():
 }
 
 // Node for convenience sake
-void PivotComponent():
+void PivotComponent() :
 {}
 {
     AggregateFunction() <K_OPAREN> Expr() <K_CPAREN> [ [ <K_AS> ] Alias() ]
 }
 
-void PivotForClause():
+void PivotForClause() :
 {}
 {
     <K_FOR> ( Column() | <K_OPAREN> Column() ( <K_COMMA> Column() )* <K_CPAREN> )
 }
 
-void PivotInClause():
+void PivotInClause() :
 {}
 {
     <K_IN> <K_OPAREN>
@@ -415,13 +415,13 @@ void PivotInClause():
 }
 
 // Node for convenience sake
-void PivotInComponent():
+void PivotInComponent() :
 {}
 {
     ( Expr() | <K_OPAREN> Expr() ( <K_COMMA> Expr() )* <K_CPAREN> ) [ [ <K_AS> ] Alias() ]
 }
 
-void UnpivotClause():
+void UnpivotClause() :
 {}
 {
     <K_UNPIVOT> [ ( <K_INCLUDE> | <K_EXCLUDE> ) <K_NULLS> ]
@@ -429,28 +429,28 @@ void UnpivotClause():
     PivotForClause() UnpivotInClause() <K_CPAREN>
 }
 
-void UnpivotInClause():
+void UnpivotInClause() :
 {}
 {
     <K_IN> <K_OPAREN> UnpivotInComponent() ( <K_COMMA> UnpivotInComponent() )* <K_CPAREN>
 }
 
 // Node for convenience sake
-void UnpivotInComponent():
+void UnpivotInComponent() :
 {}
 {
     ( Column() | <K_OPAREN> Column() ( <K_COMMA> Column() )*  <K_CPAREN> )
     [ <K_AS> ( Literal() | <K_OPAREN> Literal() ( <K_COMMA> Literal() )*  <K_CPAREN> ) ]
 }
 
-void SampleClause():
+void SampleClause() :
 {}
 {
     <K_SAMPLE> [ <K_BLOCK> ] <K_OPAREN> SamplePercent() <K_CPAREN>
     [ <K_SEED> <K_OPAREN> SeedValue() <K_CPAREN> ]
 }
 
-void PartitionExtensionClause():
+void PartitionExtensionClause() :
 {}
 {
     (
@@ -472,31 +472,31 @@ void PartitionExtensionClause():
     )
 }
 
-void SubqueryRestrictionClause():
+void SubqueryRestrictionClause() :
 {}
 {
     <K_WITH> ( <K_READ> <K_ONLY> | <K_CHECK> <K_OPTION> ) [ <K_CONSTRAINT> Constraint() ]
 }
 
-void TableCollectionExpression():
+void TableCollectionExpression() :
 {}
 {
     <K_TABLE> <K_OPAREN> CollectionExpression() <K_CPAREN> [ <K_TABLE> <K_PLUS> <K_CPAREN> ]
 }
 
-void ContainersClause():
+void ContainersClause() :
 {}
 {
     <K_CONTAINERS> <K_OPAREN> [ Schema() <K_DOT> ] ( Table() | View() ) <K_CPAREN>
 }
 
-void JoinClause():
+void JoinClause() :
 {}
 {
     TableReference() ( InnerCrossJoinClause() | OuterJoinClause() | CrossOuterApplyClause() )+
 }
 
-void InnerCrossJoinClause():
+void InnerCrossJoinClause() :
 {}
 {
     [ <K_INNER> ] <K_JOIN> TableReference()
@@ -505,7 +505,7 @@ void InnerCrossJoinClause():
     ( <K_CROSS> | <K_NATURAL> [ <K_INNER> ] ) <K_JOIN> TableReference()
 }
 
-void OuterJoinClause():
+void OuterJoinClause() :
 {}
 {
     [ QueryPartitionClause() ] [ <K_NATURAL> ] OuterJoinType() <K_JOIN>
@@ -513,32 +513,32 @@ void OuterJoinClause():
     [ <K_ON> Condition() | <K_USING> <K_OPAREN> Column() ( <K_COMMA> Column() )* <K_CPAREN> ]
 }
 
-void QueryPartitionClause():
+void QueryPartitionClause() :
 {}
 {
     <K_PARTITION> <K_BY>
     ( Expr() ( <K_COMMA> Expr() )* | <K_OPAREN> Expr() ( <K_COMMA> Expr() )* <K_CPAREN> )
 }
 
-void OuterJoinType():
+void OuterJoinType() :
 {}
 {
     ( <K_FULL> | <K_LEFT> | <K_RIGHT> ) [ <K_OUTER> ]
 }
 
-void CrossOuterApplyClause():
+void CrossOuterApplyClause() :
 {}
 {
     ( <K_CROSS> | <K_OUTER> ) <K_APPLY> ( TableReference() | CollectionExpression() )
 }
 
-void WhereClause():
+void WhereClause() :
 {}
 {
     <K_WHERE> Condition()
 }
 
-void HierarchicalQueryClause():
+void HierarchicalQueryClause() :
 {}
 {
     <K_CONNECT> <K_BY> [ <K_NOCYCLE> ] Condition() [ <K_START> <K_WITH> Condition() ]
@@ -546,45 +546,45 @@ void HierarchicalQueryClause():
     <K_START> <K_WITH> Condition() <K_CONNECT> <K_BY> [ <K_NOCYCLE> ] Condition()
 }
 
-void GroupByClause():
+void GroupByClause() :
 {}
 {
     <K_GROUP> <K_BY> GroupByComponent() ( <K_COMMA> GroupByComponent() )* [ <K_HAVING> Condition() ]
 }
 
 // Node for convenience sake
-void GroupByComponent():
+void GroupByComponent() :
 {}
 {
     Expr() | RollupCubeClause() | GroupingSetsClause()
 }
 
-void RollupCubeClause():
+void RollupCubeClause() :
 {}
 {
     ( <K_ROLLUP> | <K_CUBE> ) <K_OPAREN> GroupingExpressionList() <K_CPAREN>
 }
 
-void GroupingSetsClause():
+void GroupingSetsClause() :
 {}
 {
     <K_GROUPING> <K_SETS> <K_OPAREN> GroupingSetsComponent() ( <K_COMMA> GroupingSetsComponent() )* <K_CPAREN>
 }
 
 // Node for convenience sake
-void GroupingSetsComponent():
+void GroupingSetsComponent() :
 {}
 {
     RollupCubeClause() | GroupingExpressionList()
 }
 
-void GroupingExpressionList():
+void GroupingExpressionList() :
 {}
 {
     ExpressionList() ( <K_COMMA> ExpressionList() )*
 }
 
-void ExpressionList():
+void ExpressionList() :
 {}
 {
     Expr() ( <K_COMMA> Expr() )*
@@ -592,39 +592,39 @@ void ExpressionList():
     <K_OPAREN> [ Expr() ] ( <K_COMMA> [ Expr() ] )* <K_CPAREN>
 }
 
-void ModelClause():
+void ModelClause() :
 {}
 {
     <K_MODEL> [ CellReferenceOptions() ] [ ReturnRowsClause() ] [ ( ReferenceModel() )+ ] MainModel()
 }
 
-void CellReferenceOptions():
+void CellReferenceOptions() :
 {}
 {
     [ ( <K_IGNORE> | <K_KEEP> ) <K_NAV> ]
     [ <K_UNIQUE> ( <K_DIMENSION> | <K_SINGLE> <K_REFERENCE> ) ]
 }
 
-void ReturnRowsClause():
+void ReturnRowsClause() :
 {}
 {
     <K_RETURN> ( <K_UPDATED> | <K_ALL> ) <K_ROWS>
 }
 
-void ReferenceModel():
+void ReferenceModel() :
 {}
 {
     <K_REFERENCE> ReferenceModelName() <K_ON> <K_OPAREN> Subquery() <K_CPAREN>
     ModelColumnClause() [ CellReferenceOptions() ]
 }
 
-void MainModel():
+void MainModel() :
 {}
 {
     [ <K_MAIN> MainModelName() ] ModelColumnClause() [ CellReferenceOptions() ] ModelRulesClause()
 }
 
-void ModelColumnClauses():
+void ModelColumnClauses() :
 {}
 {
     [ <K_PARTITION> <K_BY> <K_OPAREN> Expr() [ CAlias() ] ( <K_COMMA> Expr() [ CAlias() ] )* <K_CPAREN> ]
@@ -632,7 +632,7 @@ void ModelColumnClauses():
     <K_MEASURES> <K_OPAREN> Expr() [ CAlias() ] ( <K_COMMA> Expr() [ CAlias() ] )* <K_CPAREN>
 }
 
-void ModelRulesClause():
+void ModelRulesClause() :
 {}
 {
     [ <K_RULES> [ <K_UPDATE> | <K_UPSERT> [ <K_ALL> ] ] [ [ <K_AUTOMATIC> | <K_SEQUENTIAL> ] <K_ORDER> ] [ ModelIterateClause() ] ]
@@ -640,19 +640,19 @@ void ModelRulesClause():
 }
 
 // Node for convenience sake
-void ModelRulesComponent():
+void ModelRulesComponent() :
 {}
 {
     [ <K_UPDATE> | <K_UPSERT> [ <K_ALL> ] ] CellAssignment() [ OrderByClause() ] <K_EQ> Expr()
 }
 
-void ModelIterateClause():
+void ModelIterateClause() :
 {}
 {
     <K_ITERATE> <K_OPAREN> Number() <K_CPAREN> [ <K_UNTIL> <K_OPAREN> Condition() <K_CPAREN> ]
 }
 
-void CellAssignment():
+void CellAssignment() :
 {}
 {
     MeasureColumn() <K_OSQBRACKET>
@@ -664,7 +664,7 @@ void CellAssignment():
     <K_CSQBRACKET>
 }
 
-void SingleColumnForLoop():
+void SingleColumnForLoop() :
 {}
 {
     <K_FOR> DimensionColumn()
@@ -675,7 +675,7 @@ void SingleColumnForLoop():
     )
 }
 
-void MultiColumnForLoop():
+void MultiColumnForLoop() :
 {}
 {
     <K_FOR> <K_OPAREN> DimensionColumn() ( <K_COMMA> DimensionColumn() )* <K_CPAREN>
@@ -683,26 +683,26 @@ void MultiColumnForLoop():
 }
 
 // Node for convenience sake
-void MultiColumnComponent():
+void MultiColumnComponent() :
 {}
 {
     <K_OPAREN> Literal() ( <K_COMMA> Literal() )* <K_CPAREN>
 }
 
-void OrderByClause():
+void OrderByClause() :
 {}
 {
     <K_ORDER> [ <K_SIBLINGS> ] <K_BY> OrderByComponent() ( <K_COMMA> OrderByComponent() )*
 }
 
 // Node for convenience sake
-void OrderByComponent():
+void OrderByComponent() :
 {}
 {
     ( Expr() | Position() | CAlias() ) [ <K_ASC> | <K_DESC> ] [ <K_NULLS> <K_FIRST> | <K_NULLS> <K_LAST> ]
 }
 
-void RowLimitingClause():
+void RowLimitingClause() :
 {}
 {
     [ <K_OFFSET> Offset() ( <K_ROW> | <K_ROWS> ) ]
@@ -710,7 +710,7 @@ void RowLimitingClause():
     ( <K_ROW> | <K_ROWS> ) ( <K_ONLY> | <K_WITH> <K_TIES> )
 }
 
-void ForUpdateClause():
+void ForUpdateClause() :
 {}
 {
     <K_FOR> <K_UPDATE>
@@ -719,13 +719,13 @@ void ForUpdateClause():
 }
 
 // Node for convenience sake
-void ForUpdateComponent():
+void ForUpdateComponent() :
 {}
 {
     [ [ Schema() <K_DOT> ] ( Table() | View() ) <K_DOT> ] Column()
 }
 
-void RowPatternClause():
+void RowPatternClause() :
 {}
 {
     <K_MATCH_RECOGNIZE> <K_OPAREN> [ RowPatternPartitionBy() ] [ RowPatternOrderBy() ] [ RowPatternMeasures() ]
@@ -733,37 +733,37 @@ void RowPatternClause():
     [ RowPatternSubsetClause() ] <K_DEFINE> RowPatternDefinitionList() <K_CPAREN>
 }
 
-void RowPatternPartitionBy():
+void RowPatternPartitionBy() :
 {}
 {
     <K_PARTITION> <K_BY> Column() ( <K_COMMA> Column() )*
 }
 
-void RowPatternOrderBy():
+void RowPatternOrderBy() :
 {}
 {
     <K_ORDER> <K_BY> Column() ( <K_COMMA> Column() )*
 }
 
-void RowPatternMeasures():
+void RowPatternMeasures() :
 {}
 {
     <K_MEASURES> RowPatternMeasureColumn() ( <K_COMMA> RowPatternMeasureColumn() )*
 }
 
-void RowPatternMeasureColumn():
+void RowPatternMeasureColumn() :
 {}
 {
     Expr() <K_AS> CAlias()
 }
 
-void RowPatternRowsPerMatch():
+void RowPatternRowsPerMatch() :
 {}
 {
     ( <K_ONE> <K_ROW> | <K_ALL> <K_ROWS> ) <K_PER> <K_MATCH>
 }
 
-void RowPatternSkipTo():
+void RowPatternSkipTo() :
 {}
 {
     <K_AFTER> <K_MATCH> <K_SKIP>
@@ -775,38 +775,38 @@ void RowPatternSkipTo():
 }
 
 /* LL cannot handle following original definitions
-void RowPattern():
+void RowPattern() :
 {}
 {
     [ RowPattern() <K_BAR> ] RowPatternTerm()
 }
 
-void RowPatternTerm():
+void RowPatternTerm() :
 {}
 {
     [ RowPatternTerm() ] RowPatternFactor()
 }
 */
 
-void RowPattern():
+void RowPattern() :
 {}
 {
     RowPatternTerm() ( <K_BAR> RowPatternTerm() )*
 }
 
-void RowPatternTerm():
+void RowPatternTerm() :
 {}
 {
     ( RowPatternFactor() )*
 }
 
-void RowPatternFactor():
+void RowPatternFactor() :
 {}
 {
     RowPatternPrimary() [ RowPatternQuantifier() ]
 }
 
-void RowPatternPrimary():
+void RowPatternPrimary() :
 {}
 {
     VarialbeName()
@@ -822,13 +822,13 @@ void RowPatternPrimary():
     RowPatternPermute()
 }
 
-void RowPatternPermute():
+void RowPatternPermute() :
 {}
 {
     <K_PERMUTE> <K_OPAREN> RowPattern() ( <K_COMMA> RowPattern() )* <K_CPAREN>
 }
 
-void RowPatternQuantifier():
+void RowPatternQuantifier() :
 {}
 {
     <K_ASTERISK> [ <K_QUESTION> ]
