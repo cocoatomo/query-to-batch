@@ -43,6 +43,7 @@ TOKEN: /* Keyword */
 {
     <K_AFTER: "AFTER">
 |   <K_ALL: "ALL">
+|   <K_AND: "AND">
 |   <K_ANY: "ANY">
 |   <K_APPLY: "APPLY">
 |   <K_AS: "AS">
@@ -122,6 +123,7 @@ TOKEN: /* Keyword */
 |   <K_OF: "OF">
 |   <K_OFFSET: "OFFSET">
 |   <K_ON: "ON">
+|   <K_ONE: "ONE">
 |   <K_ONLY: "ONLY">
 |   <K_OUTER: "OUTER">
 |   <K_OPAREN: "(">
@@ -184,7 +186,8 @@ TOKEN: /* Keyword */
 
 TOKEN: /* Numeric */
 {
-
+    <S_NUMBER: <DIGIT>>
+|   <#DIGIT: ["0" - "9"]>
 }
 
 /*
